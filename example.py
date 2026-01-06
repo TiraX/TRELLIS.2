@@ -25,9 +25,9 @@ image = Image.open("assets/example_image/T.png")
 mesh = pipeline.run(image)[0]
 mesh.simplify(16777216) # nvdiffrast limit
 
-# 4. Render Video
-video = render_utils.make_pbr_vis_frames(render_utils.render_video(mesh, envmap=envmap))
-imageio.mimsave("sample.mp4", video, fps=15)
+# # 4. Render Video
+# video = render_utils.make_pbr_vis_frames(render_utils.render_video(mesh, envmap=envmap))
+# imageio.mimsave("sample.mp4", video, fps=15)
 
 # 5. Export to GLB
 glb = o_voxel.postprocess.to_glb(
@@ -38,11 +38,11 @@ glb = o_voxel.postprocess.to_glb(
     attr_layout         =   mesh.layout,
     voxel_size          =   mesh.voxel_size,
     aabb                =   [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
-    decimation_target   =   1000000,
+    decimation_target   =   2000000,
     texture_size        =   4096,
     remesh              =   True,
     remesh_band         =   1,
     remesh_project      =   0,
     verbose             =   True
 )
-glb.export("sample.glb", extension_webp=True)
+glb.export("sample.glb", extension_webp=False)
