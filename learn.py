@@ -128,12 +128,16 @@ def image_to_mesh(image_path: str, output_path: str, verbose: bool = True):
         output_path: Path to output GLB file
         verbose: Whether to print verbose messages
     """
+    if os.path.exists(output_path):
+        print(f"Skipping file already exists: {output_path}")
+        return
+    
     if verbose:
         print(f"\nProcessing: {image_path}")
     
     # Load Image & Run
     image = Image.open(image_path)
-    mesh = pipeline.run(image=image, pipeline_type='1024_cascade')[0]
+    mesh = pipeline.run(image=image, tex_slat_sampler_params = {"steps": 1}, pipeline_type='1024_cascade')[0]
     mesh.simplify(16777216)  # nvdiffrast limit
     
     # Export to GLB

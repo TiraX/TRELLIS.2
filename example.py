@@ -162,7 +162,8 @@ def to_glb_cpu(
     if not remesh:
         # Aggressive simplification (3x target)
         if len(mesh.faces) > decimation_target * 3:
-            mesh = mesh.simplify_quadric_decimation(decimation_target * 3)
+            target_ratio = (decimation_target * 3) / len(mesh.faces)
+            mesh = mesh.simplify_quadric_decimation(target_ratio)
             if verbose:
                 print(f"After initial simplification: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
         
@@ -178,7 +179,8 @@ def to_glb_cpu(
         
         # Final simplification to target count
         if len(mesh.faces) > decimation_target:
-            mesh = mesh.simplify_quadric_decimation(decimation_target)
+            target_ratio = decimation_target / len(mesh.faces)
+            mesh = mesh.simplify_quadric_decimation(target_ratio)
             if verbose:
                 print(f"After final simplification: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
         
@@ -197,7 +199,8 @@ def to_glb_cpu(
             print("Warning: Remeshing is not supported in CPU mode. Skipping remeshing.")
         # Just simplify
         if len(mesh.faces) > decimation_target:
-            mesh = mesh.simplify_quadric_decimation(decimation_target)
+            target_ratio = decimation_target / len(mesh.faces)
+            mesh = mesh.simplify_quadric_decimation(target_ratio)
             if verbose:
                 print(f"After simplification: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
     
