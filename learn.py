@@ -135,31 +135,53 @@ def image_to_mesh(image_path: str, output_path: str, verbose: bool = True):
     if verbose:
         print(f"\nProcessing: {image_path}")
     
-    # Load Image & Run
-    image = Image.open(image_path)
-    mesh = pipeline.run(image=image, tex_slat_sampler_params = {"steps": 1}, pipeline_type='1024_cascade')[0]
-    mesh.simplify(16777216)  # nvdiffrast limit
-    
-    # Export to GLB
-    glb = to_glb_cpu_vertex_only(
-        vertices            =   mesh.vertices,
-        faces               =   mesh.faces,
-        attr_volume         =   mesh.attrs,
-        coords              =   mesh.coords,
-        attr_layout         =   mesh.layout,
-        voxel_size          =   mesh.voxel_size,
-        aabb                =   [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
-        decimation_target   =   2000000,
-        texture_size        =   4096,
-        remesh              =   True,
-        remesh_band         =   1,
-        remesh_project      =   0,
-        verbose             =   verbose
-    )
-    glb.export(output_path, extension_webp=False)
+    # Create an empty temporary GLB file
+    with open(output_path, 'w') as f:
+        pass
     
     if verbose:
-        print(f"Saved to: {output_path}")
+        print(f"Created temporary file: {output_path}")
+    
+    try:
+        # Load Image & Run
+        image = Image.open(image_path)
+        mesh = pipeline.run(image=image, tex_slat_sampler_params = {"steps": 1}, pipeline_type='1024_cascade')[0]
+        mesh.simplify(16777216)  # nvdiffrast limit
+        
+        # Export to GLB
+        glb = to_glb_cpu_vertex_only(
+            vertices            =   mesh.vertices,
+            faces               =   mesh.faces,
+            attr_volume         =   mesh.attrs,
+            coords              =   mesh.coords,
+            attr_layout         =   mesh.layout,
+            voxel_size          =   mesh.voxel_size,
+            aabb                =   [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
+            decimation_target   =   2000000,
+            texture_size        =   4096,
+            remesh              =   True,
+            remesh_band         =   1,
+            remesh_project      =   0,
+            verbose             =   verbose
+        )
+        
+        # Delete the temporary file before saving the real GLB
+        if os.path.exists(output_path):
+            os.remove(output_path)
+            if verbose:
+                print(f"Deleted temporary file: {output_path}")
+        
+        glb.export(output_path, extension_webp=False)
+        
+        if verbose:
+            print(f"Saved to: {output_path}")
+    except Exception as e:
+        # Clean up temporary file if an error occurs
+        if os.path.exists(output_path):
+            os.remove(output_path)
+            if verbose:
+                print(f"Cleaned up temporary file due to error: {output_path}")
+        raise e
 
 def main():
     """
